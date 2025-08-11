@@ -29,10 +29,3 @@ Crafted by **Burinious Web Solutions**.
 ![Log Day Screenshot](docs/images/logday.png)  
 
 ---
-
-## 🚀 Getting Started
-
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/YOUR_USERNAME/burinious-weight-coach.git
-cd burinious-weight-coach
