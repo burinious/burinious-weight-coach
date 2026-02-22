@@ -4,29 +4,39 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "deploy:gh": "gh-pages -d dist"
+    "dev": "node ./node_modules/vite/bin/vite.js",
+    "build": "node ./node_modules/vite/bin/vite.js build",
+    "preview": "node ./node_modules/vite/bin/vite.js preview",
+    "deploy:gh": "gh-pages -d dist",
+    "mobile:sync": "npm run build && npx cap sync android",
+    "mobile:sync:ios": "npm run build && npx cap sync ios",
+    "mobile:add:android": "npx cap add android",
+    "mobile:add:ios": "npx cap add ios",
+    "mobile:android": "npm run build && npx cap sync android && npx cap open android",
+    "mobile:ios": "npm run build && npx cap sync ios && npx cap open ios"
   },
   "dependencies": {
+    "@capacitor/android": "^7.5.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.5.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.5",
     "@mui/material": "^6.1.5",
     "date-fns": "^3.6.0",
     "immer": "^10.1.1",
-    "recharts": "^2.12.7",
-    "zustand": "^4.5.4",
-    "zod": "^3.23.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.1"
+    "react-router-dom": "^6.26.1",
+    "recharts": "^2.12.7",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "gh-pages": "^6.2.0",
     "vite": "^5.4.2",
-    "vite-plugin-pwa": "^0.20.5",
-    "gh-pages": "^6.2.0"
+    "vite-plugin-pwa": "^0.20.5"
   }
 }

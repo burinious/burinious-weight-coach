@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Burinious Weight Coach</string>
+    <string name="title_activity_main">Burinious Weight Coach</string>
+    <string name="package_name">com.burinious.weightcoach</string>
+    <string name="custom_url_scheme">com.burinious.weightcoach</string>
+</resources>

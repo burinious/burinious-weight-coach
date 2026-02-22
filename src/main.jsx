@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { CssBaseline, ThemeProvider } from '@mui/material'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { RouterProvider, createHashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import LogDay from './pages/LogDay.jsx'
@@ -10,7 +10,7 @@ import Settings from './pages/Settings.jsx'
 import theme from './theme.js'
 import './styles.css'
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
     element: <App />,

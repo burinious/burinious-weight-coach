@@ -1,31 +1,80 @@
 # Burinious Weight Coach
 
-**Your 90-day personal weight loss coach – track, plan, and achieve your goals.**
+Flexible-duration weight coaching app built with React + Vite + Zustand.
 
-A production-ready **React + Vite PWA** designed for a **15 kg weight loss in 90 days**.  
-Built with **Material UI**, **Zustand**, and **Recharts**, this mobile-first, offline-ready app helps you stay consistent with your fitness journey.
+## What It Does
 
-Crafted by **Burinious Web Solutions**.
+- Generates a workout plan for 30, 45, 60, 90, 120, or 180 days.
+- Tracks daily calories, protein, water, steps, workout minutes, and body weight.
+- Includes a Start Program flow and dashboard insights (streaks, adherence, trend signals).
+- Persists all data locally in `localStorage`.
+- Runs as a PWA and can be packaged as a native mobile app with Capacitor.
 
----
+## Tech Stack
 
-## ✨ Features
+- React 18
+- Vite
+- Material UI
+- Zustand + Immer + persisted store
+- Recharts
+- date-fns
+- Zod
+- Capacitor (mobile packaging)
 
-- 📅 **90-Day Plan** – Automatically generated daily workout & nutrition goals.
-- 🥗 **Daily Logging** – Track calories, protein, water, steps, workouts, and weight.
-- 📊 **Progress Charts** – Visualize weight changes with interactive Recharts graphs.
-- 📱 **Mobile-First UI** – Clean, modern Material UI dark theme.
-- 📦 **Offline Support** – Installable as a PWA; works without internet.
-- ⚡ **Fast & Lightweight** – Built with Vite for instant loading.
-- 🔒 **Local Storage Persistence** – Your data stays on your device (can be upgraded to Firebase sync).
+## Local Development
 
----
+1. Install dependencies:
+```bash
+npm install
+```
+2. Start dev server:
+```bash
+npm run dev
+```
+3. Build production bundle:
+```bash
+npm run build
+```
 
-## 📸 Screenshots
+## App Architecture
 
-*(Replace with actual screenshots once running)*
+- `src/store/useAppStore.js`: global persisted state for settings, logs, weights, and generated plan.
+- `src/utils/plan.js`: deterministic day-by-day plan generator.
+- `src/pages/Dashboard.jsx`: KPI view, daily progress, chart, and upcoming sessions.
+- `src/pages/LogDay.jsx`: validated daily logging form.
+- `src/pages/History.jsx`: mobile cards and desktop table for historical logs.
+- `src/pages/Settings.jsx`: target configuration, plan regeneration, and full reset.
+- `src/components/WeightChart.jsx`: weight trend chart with empty-state handling.
 
-![Dashboard Screenshot](docs/images/dashboard.png)  
-![Log Day Screenshot](docs/images/logday.png)  
+## Mobile App Setup (Capacitor)
 
----
+After `npm install`, you can package the web app into native shells:
+
+1. Build and sync web assets:
+```bash
+npm run mobile:sync
+```
+2. Add Android project (first time only):
+```bash
+npm run mobile:add:android
+```
+3. Open Android Studio:
+```bash
+npm run mobile:android
+```
+4. Add iOS project on macOS (first time only):
+```bash
+npm run mobile:add:ios
+```
+5. Sync iOS web assets on macOS:
+```bash
+npm run mobile:sync:ios
+```
+6. Open Xcode on macOS:
+```bash
+npm run mobile:ios
+```
+
+Capacitor config lives in `capacitor.config.json`.
+
+iOS native dependency installation requires CocoaPods (`pod`) on macOS.

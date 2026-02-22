@@ -1,0 +1,16 @@
+{
+  "appId": "com.burinious.weightcoach",
+  "appName": "Burinious Weight Coach",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#f5f7ef",
+      "showSpinner": false
+    }
+  }
+}

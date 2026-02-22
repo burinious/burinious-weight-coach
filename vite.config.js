@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     VitePWA({
@@ -12,10 +13,10 @@ export default defineConfig({
         name: 'Burinious Weight Coach',
         short_name: 'Burinious Coach',
         description: '90-day weight loss coach app (offline-ready)',
-        theme_color: '#0ea5e9',
-        background_color: '#0b1020',
+        theme_color: '#0f766e',
+        background_color: '#f5f7ef',
         display: 'standalone',
-        start_url: '/',
+        start_url: './',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' }
