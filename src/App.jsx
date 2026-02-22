@@ -198,7 +198,7 @@ export default function App() {
           sx={{
             py: { xs: 2, md: 4 },
             px: { xs: 1.25, sm: 2, md: 3 },
-            pb: { xs: 'calc(92px + env(safe-area-inset-bottom))', md: 'calc(98px + env(safe-area-inset-bottom))' },
+            pb: { xs: 'calc(86px + env(safe-area-inset-bottom))', md: 'calc(92px + env(safe-area-inset-bottom))' },
             flex: 1
           }}
         >
@@ -210,11 +210,16 @@ export default function App() {
         <Box
           component="footer"
           sx={{
-            pb: 0.75,
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: 'calc(8px + env(safe-area-inset-bottom))',
             textAlign: 'center',
-            opacity: 0.7,
-            fontSize: 12,
-            px: 1
+            opacity: 0.5,
+            fontSize: 11,
+            px: 1,
+            zIndex: 1100,
+            pointerEvents: 'none'
           }}
         >
           Powered by Burinious Web Solutions
@@ -225,17 +230,22 @@ export default function App() {
         elevation={14}
         sx={{
           position: 'fixed',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'min(760px, calc(100% - 20px))',
-          bottom: 'calc(10px + env(safe-area-inset-bottom))',
+          left: 0,
+          right: 0,
+          width: '100%',
+          bottom: 0,
           zIndex: 1200,
-          borderRadius: 4,
+          borderRadius: '22px 22px 0 0',
           border: '1px solid rgba(20, 32, 34, 0.08)',
           overflow: 'hidden'
         }}
       >
-        <BottomNavigation value={activePath} onChange={(_, next) => navigate(next)} showLabels>
+        <BottomNavigation
+          value={activePath}
+          onChange={(_, next) => navigate(next)}
+          showLabels
+          sx={{ minHeight: 62, pb: 'env(safe-area-inset-bottom)' }}
+        >
           {navItems.map((item) => (
             <BottomNavigationAction key={item.to} value={item.to} label={item.label} icon={item.icon} sx={{ minWidth: 0 }} />
           ))}

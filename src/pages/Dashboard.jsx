@@ -303,9 +303,12 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={7}>
-          <Card className="stagger-rise" sx={{ animationDelay: '80ms' }}>
+      <Grid container spacing={2} justifyContent="center" alignItems="stretch">
+        <Grid item xs={12} md={7} sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Card
+            className="stagger-rise"
+            sx={{ animationDelay: '80ms', width: '100%', maxWidth: { xs: '100%', md: 760 }, height: '100%' }}
+          >
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.25 }}>
                 <Stack direction="row" spacing={1} alignItems="center">
@@ -373,8 +376,11 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={5}>
-          <Card className="stagger-rise" sx={{ animationDelay: '140ms', height: '100%' }}>
+        <Grid item xs={12} md={5} sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Card
+            className="stagger-rise"
+            sx={{ animationDelay: '140ms', width: '100%', maxWidth: { xs: '100%', md: 540 }, height: '100%' }}
+          >
             <CardContent sx={{ height: '100%' }}>
               <Stack spacing={1.25} sx={{ height: '100%' }}>
                 <Typography variant="h6">Insights</Typography>
