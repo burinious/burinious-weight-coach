@@ -2,8 +2,26 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const appVersion = process.env.npm_package_version || '0.0.0'
+
 export default defineConfig({
   base: './',
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion)
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          charts: ['recharts'],
+          store: ['zustand', 'zustand/middleware', 'immer'],
+          utils: ['date-fns', 'zod']
+        }
+      }
+    }
+  },
   plugins: [
     react(),
     VitePWA({

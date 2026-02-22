@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import {
   Card,
   CardContent,
@@ -12,7 +12,9 @@ import {
   Stack,
   Grid,
   Chip,
-  Box
+  Box,
+  Button,
+  ButtonGroup
 } from '@mui/material'
 import {
   CalendarMonthRounded,
@@ -21,17 +23,85 @@ import {
   WaterDropRounded,
   DirectionsWalkRounded,
   FitnessCenterRounded,
-  MonitorWeightRounded
+  MonitorWeightRounded,
+  DownloadRounded,
+  FilterAltRounded
 } from '@mui/icons-material'
+import { format, subDays } from 'date-fns'
 import useAppStore from '../store/useAppStore.js'
+
+const metricCatalog = [
+  { key: 'calories', label: 'Calories', icon: <RestaurantRounded fontSize="inherit" />, unit: 'kcal' },
+  { key: 'protein', label: 'Protein', icon: <EggRounded fontSize="inherit" />, unit: 'g' },
+  { key: 'water', label: 'Water', icon: <WaterDropRounded fontSize="inherit" />, unit: 'ml' },
+  { key: 'steps', label: 'Steps', icon: <DirectionsWalkRounded fontSize="inherit" />, unit: '' },
+  { key: 'workoutMins', label: 'Workout', icon: <FitnessCenterRounded fontSize="inherit" />, unit: 'min' },
+  { key: 'weightKg', label: 'Weight', icon: <MonitorWeightRounded fontSize="inherit" />, unit: 'kg' }
+]
+
+function metricsForMode(mode) {
+  if (mode === 'nutrition') return metricCatalog.filter((item) => ['calories', 'protein', 'water'].includes(item.key))
+  if (mode === 'activity') return metricCatalog.filter((item) => ['steps', 'workoutMins'].includes(item.key))
+  if (mode === 'weight') return metricCatalog.filter((item) => item.key === 'weightKg')
+  return metricCatalog
+}
+
+function csvEscape(value) {
+  const text = String(value ?? '')
+  if (!/[",\n]/.test(text)) return text
+  return `"${text.replace(/"/g, '""')}"`
+}
+
+function getMetricValue(row, weightByDate, metricKey) {
+  if (metricKey === 'weightKg') return weightByDate[row.date]
+  return row[metricKey]
+}
 
 export default function History() {
   const { logs, weights } = useAppStore()
-  const rows = Object.entries(logs)
-    .map(([date, value]) => ({ date, ...value }))
-    .sort((a, b) => b.date.localeCompare(a.date))
+  const [range, setRange] = useState('90')
+  const [mode, setMode] = useState('all')
 
-  const weightByDate = Object.fromEntries(weights.map((entry) => [entry.date, entry.kg]))
+  const rows = useMemo(
+    () =>
+      Object.entries(logs)
+        .map(([date, value]) => ({ date, ...value }))
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    [logs]
+  )
+
+  const weightByDate = useMemo(
+    () => Object.fromEntries(weights.map((entry) => [entry.date, entry.kg])),
+    [weights]
+  )
+
+  const rangeDays = range === 'all' ? null : Number(range)
+  const cutoffDate = rangeDays ? format(subDays(new Date(), rangeDays - 1), 'yyyy-MM-dd') : ''
+  const filteredRows = cutoffDate ? rows.filter((row) => row.date >= cutoffDate) : rows
+  const activeMetrics = metricsForMode(mode)
+
+  const onExportCsv = () => {
+    if (!filteredRows.length) return
+
+    const header = ['Date', ...activeMetrics.map((metric) => metric.label)]
+    const lines = filteredRows.map((row) => [
+      row.date,
+      ...activeMetrics.map((metric) => getMetricValue(row, weightByDate, metric.key))
+    ])
+    const csv = [header, ...lines]
+      .map((fields) => fields.map((field) => csvEscape(formatValue(field))).join(','))
+      .join('\n')
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `history-${mode}-${range}-${format(new Date(), 'yyyyMMdd')}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <Stack spacing={2}>
@@ -46,12 +116,73 @@ export default function History() {
             <Box>
               <Typography variant="h6">History</Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Review daily compliance, nutrition, movement, and weight trends.
+                Filter by period and focus area, then export exactly what you need.
               </Typography>
             </Box>
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-              <Chip size="small" icon={<CalendarMonthRounded />} label={`${rows.length} logged days`} />
+              <Chip size="small" icon={<CalendarMonthRounded />} label={`${filteredRows.length} filtered days`} />
               <Chip size="small" color="secondary" icon={<MonitorWeightRounded />} label={`${weights.length} weigh-ins`} />
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <Stack spacing={1.25}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25} justifyContent="space-between">
+              <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                <FilterAltRounded color="primary" />
+                <ButtonGroup size="small" variant="outlined" aria-label="range">
+                  <Button variant={range === '30' ? 'contained' : 'outlined'} onClick={() => setRange('30')}>
+                    30d
+                  </Button>
+                  <Button variant={range === '60' ? 'contained' : 'outlined'} onClick={() => setRange('60')}>
+                    60d
+                  </Button>
+                  <Button variant={range === '90' ? 'contained' : 'outlined'} onClick={() => setRange('90')}>
+                    90d
+                  </Button>
+                  <Button variant={range === 'all' ? 'contained' : 'outlined'} onClick={() => setRange('all')}>
+                    All
+                  </Button>
+                </ButtonGroup>
+              </Stack>
+              <Button
+                variant="contained"
+                startIcon={<DownloadRounded />}
+                onClick={onExportCsv}
+                disabled={!filteredRows.length}
+              >
+                Export CSV
+              </Button>
+            </Stack>
+
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Chip
+                label="All"
+                clickable
+                color={mode === 'all' ? 'primary' : 'default'}
+                onClick={() => setMode('all')}
+              />
+              <Chip
+                label="Nutrition"
+                clickable
+                color={mode === 'nutrition' ? 'primary' : 'default'}
+                onClick={() => setMode('nutrition')}
+              />
+              <Chip
+                label="Activity"
+                clickable
+                color={mode === 'activity' ? 'primary' : 'default'}
+                onClick={() => setMode('activity')}
+              />
+              <Chip
+                label="Weight"
+                clickable
+                color={mode === 'weight' ? 'primary' : 'default'}
+                onClick={() => setMode('weight')}
+              />
             </Stack>
           </Stack>
         </CardContent>
@@ -59,40 +190,32 @@ export default function History() {
 
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
         <Stack spacing={1.25}>
-          {rows.length === 0 && (
+          {filteredRows.length === 0 && (
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  No history yet. Start by logging your first day.
+                  No history in this filter range yet.
                 </Typography>
               </CardContent>
             </Card>
           )}
-          {rows.map((row) => (
+          {filteredRows.map((row) => (
             <Card key={row.date} variant="outlined">
               <CardContent>
                 <Grid container spacing={1}>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2">{row.date}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
-                    <SmallStat icon={<RestaurantRounded fontSize="inherit" />} label="Calories" value={row.calories} unit="kcal" />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <SmallStat icon={<EggRounded fontSize="inherit" />} label="Protein" value={row.protein} unit="g" />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <SmallStat icon={<WaterDropRounded fontSize="inherit" />} label="Water" value={row.water} unit="ml" />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <SmallStat icon={<DirectionsWalkRounded fontSize="inherit" />} label="Steps" value={row.steps} />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <SmallStat icon={<FitnessCenterRounded fontSize="inherit" />} label="Workout" value={row.workoutMins} unit="min" />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <SmallStat icon={<MonitorWeightRounded fontSize="inherit" />} label="Weight" value={weightByDate[row.date]} unit="kg" />
-                  </Grid>
+                  {activeMetrics.map((metric) => (
+                    <Grid item xs={6} key={`${row.date}-${metric.key}`}>
+                      <SmallStat
+                        icon={metric.icon}
+                        label={metric.label}
+                        value={getMetricValue(row, weightByDate, metric.key)}
+                        unit={metric.unit}
+                      />
+                    </Grid>
+                  ))}
                 </Grid>
               </CardContent>
             </Card>
@@ -107,31 +230,27 @@ export default function History() {
               <TableHead>
                 <TableRow>
                   <TableCell>Date</TableCell>
-                  <TableCell>Calories</TableCell>
-                  <TableCell>Protein (g)</TableCell>
-                  <TableCell>Water (ml)</TableCell>
-                  <TableCell>Steps</TableCell>
-                  <TableCell>Workout (min)</TableCell>
-                  <TableCell>Weight (kg)</TableCell>
+                  {activeMetrics.map((metric) => (
+                    <TableCell key={metric.key}>{metric.label}{metric.unit ? ` (${metric.unit})` : ''}</TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
+                {filteredRows.map((row) => (
                   <TableRow key={row.date}>
                     <TableCell>{row.date}</TableCell>
-                    <TableCell>{formatValue(row.calories)}</TableCell>
-                    <TableCell>{formatValue(row.protein)}</TableCell>
-                    <TableCell>{formatValue(row.water)}</TableCell>
-                    <TableCell>{formatValue(row.steps)}</TableCell>
-                    <TableCell>{formatValue(row.workoutMins)}</TableCell>
-                    <TableCell>{formatValue(weightByDate[row.date])}</TableCell>
+                    {activeMetrics.map((metric) => (
+                      <TableCell key={`${row.date}-${metric.key}`}>
+                        {formatValue(getMetricValue(row, weightByDate, metric.key))}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 ))}
-                {rows.length === 0 && (
+                {filteredRows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7}>
+                    <TableCell colSpan={activeMetrics.length + 1}>
                       <Typography variant="body2" sx={{ color: 'text.secondary', py: 1 }}>
-                        No history yet. Start by logging your first day.
+                        No history in this filter range yet.
                       </Typography>
                     </TableCell>
                   </TableRow>

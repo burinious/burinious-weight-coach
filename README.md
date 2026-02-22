@@ -36,6 +36,16 @@ npm run dev
 npm run build
 ```
 
+Optional APK banner link override:
+```bash
+VITE_LATEST_APK_URL=https://your-host/path/latest.apk
+```
+
+Optional release API override for update detection:
+```bash
+VITE_RELEASES_API_URL=https://api.github.com/repos/your-org/your-repo/releases/latest
+```
+
 ## App Architecture
 
 - `src/store/useAppStore.js`: global persisted state for settings, logs, weights, and generated plan.

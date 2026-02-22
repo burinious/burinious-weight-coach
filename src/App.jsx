@@ -1,15 +1,18 @@
-import React from 'react'
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   AppBar,
   Toolbar,
   Typography,
   Box,
-  Button,
   Container,
   Stack,
   Chip,
   Paper,
+  Alert,
+  Button,
+  IconButton,
+  Snackbar,
   BottomNavigation,
   BottomNavigationAction
 } from '@mui/material'
@@ -17,19 +20,107 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded'
 import TimelineRoundedIcon from '@mui/icons-material/TimelineRounded'
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import CoachGlyph from './components/CoachGlyph.jsx'
 
 const navItems = [
-  { to: '/', label: 'Dashboard', mobileLabel: 'Home', icon: <HomeRoundedIcon /> },
-  { to: '/log', label: 'Log Day', mobileLabel: 'Log', icon: <EditNoteRoundedIcon /> },
-  { to: '/history', label: 'History', mobileLabel: 'History', icon: <TimelineRoundedIcon /> },
-  { to: '/settings', label: 'Settings', mobileLabel: 'Settings', icon: <TuneRoundedIcon /> }
+  { to: '/', label: 'Home', icon: <HomeRoundedIcon /> },
+  { to: '/log', label: 'Log', icon: <EditNoteRoundedIcon /> },
+  { to: '/history', label: 'History', icon: <TimelineRoundedIcon /> },
+  { to: '/settings', label: 'Settings', icon: <TuneRoundedIcon /> }
 ]
+const APK_DISMISS_KEY = 'bwc-apk-banner-dismissed-v1'
+const DEFAULT_APK_URL = 'https://github.com/burinious/burinious-weight-coach/releases/latest'
+const DEFAULT_RELEASES_API_URL = 'https://api.github.com/repos/burinious/burinious-weight-coach/releases/latest'
+const APP_VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : '0.0.0'
+
+function normalizeVersion(value) {
+  if (!value) return ''
+  const clean = String(value).trim().replace(/^v/i, '')
+  const match = clean.match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/)
+  if (!match) return ''
+  return `${Number(match[1] || 0)}.${Number(match[2] || 0)}.${Number(match[3] || 0)}`
+}
+
+function compareSemver(a, b) {
+  const left = normalizeVersion(a).split('.').map((part) => Number(part || 0))
+  const right = normalizeVersion(b).split('.').map((part) => Number(part || 0))
+  for (let idx = 0; idx < 3; idx++) {
+    if ((left[idx] || 0) > (right[idx] || 0)) return 1
+    if ((left[idx] || 0) < (right[idx] || 0)) return -1
+  }
+  return 0
+}
 
 export default function App() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const activePath = navItems.some((item) => item.to === pathname) ? pathname : '/'
+  const manualApkUrl = import.meta.env.VITE_LATEST_APK_URL
+  const releasesApiUrl = import.meta.env.VITE_RELEASES_API_URL || DEFAULT_RELEASES_API_URL
+  const [dismissedToken, setDismissedToken] = useState(() => localStorage.getItem(APK_DISMISS_KEY) || '')
+  const [releaseState, setReleaseState] = useState(() => ({
+    version: '',
+    url: manualApkUrl || DEFAULT_APK_URL,
+    hasUpdate: Boolean(manualApkUrl),
+    token: manualApkUrl || 'manual-fallback',
+    loading: !manualApkUrl
+  }))
+
+  useEffect(() => {
+    let active = true
+
+    async function loadRelease() {
+      if (!releasesApiUrl) {
+        setReleaseState((prev) => ({ ...prev, loading: false }))
+        return
+      }
+
+      try {
+        const response = await fetch(releasesApiUrl, {
+          headers: { Accept: 'application/vnd.github+json' }
+        })
+        if (!response.ok) throw new Error(`release_request_failed_${response.status}`)
+        const payload = await response.json()
+        const latestVersion = normalizeVersion(payload?.tag_name || payload?.name || '')
+        const apkAsset = Array.isArray(payload?.assets)
+          ? payload.assets.find((item) => String(item?.name || '').toLowerCase().endsWith('.apk'))
+          : null
+        const candidateUrl =
+          manualApkUrl ||
+          apkAsset?.browser_download_url ||
+          payload?.html_url ||
+          DEFAULT_APK_URL
+        const hasUpdate = latestVersion ? compareSemver(latestVersion, APP_VERSION) > 0 : Boolean(manualApkUrl)
+        if (!active) return
+        setReleaseState({
+          version: latestVersion,
+          url: candidateUrl,
+          hasUpdate,
+          token: latestVersion || candidateUrl,
+          loading: false
+        })
+      } catch {
+        if (!active) return
+        setReleaseState((prev) => ({ ...prev, loading: false }))
+      }
+    }
+
+    loadRelease()
+    return () => {
+      active = false
+    }
+  }, [manualApkUrl, releasesApiUrl])
+
+  const showApkBanner = useMemo(() => {
+    if (releaseState.loading || !releaseState.hasUpdate) return false
+    return dismissedToken !== releaseState.token
+  }, [dismissedToken, releaseState.hasUpdate, releaseState.loading, releaseState.token])
+
+  const dismissApkBanner = () => {
+    localStorage.setItem(APK_DISMISS_KEY, releaseState.token)
+    setDismissedToken(releaseState.token)
+  }
 
   return (
     <Box className="app-shell">
@@ -37,7 +128,7 @@ export default function App() {
       <Box className="bg-orb orb-b" />
       <Box className="shell-content">
         <AppBar position="sticky" elevation={0}>
-          <Toolbar sx={{ minHeight: { xs: 66, md: 76 }, gap: { xs: 1, md: 2 }, px: { xs: 1.25, md: 2 } }}>
+          <Toolbar sx={{ minHeight: { xs: 66, md: 76 }, gap: 1.25, px: { xs: 1.25, md: 2 } }}>
             <Stack direction="row" spacing={1.25} alignItems="center" sx={{ flexGrow: 1, minWidth: 0 }}>
               <Box
                 sx={{
@@ -64,37 +155,50 @@ export default function App() {
                 </Typography>
               </Box>
             </Stack>
-
-            <Chip
-              label="Offline Ready"
-              size="small"
-              color="secondary"
-              sx={{ display: { xs: 'none', lg: 'inline-flex' } }}
-            />
-
-            <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {navItems.map((item) => (
-                <Button
-                  key={item.to}
-                  component={Link}
-                  to={item.to}
-                  variant={pathname === item.to ? 'contained' : 'text'}
-                  color={pathname === item.to ? 'primary' : 'inherit'}
-                  startIcon={item.icon}
-                >
-                  {item.label}
-                </Button>
-              ))}
-            </Stack>
+            <Chip label="Offline Ready" size="small" color="secondary" sx={{ display: { xs: 'none', md: 'inline-flex' } }} />
           </Toolbar>
         </AppBar>
+
+        <Snackbar
+          open={showApkBanner}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          sx={{ mt: { xs: '72px', md: '82px' }, width: { xs: 'calc(100% - 20px)', sm: 'auto' } }}
+        >
+          <Alert
+            severity="info"
+            variant="filled"
+            sx={{ width: '100%', alignItems: 'center', borderRadius: 2.5 }}
+            action={
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Button
+                  color="inherit"
+                  size="small"
+                  component="a"
+                  href={releaseState.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  sx={{ fontWeight: 700 }}
+                >
+                  Download APK
+                </Button>
+                <IconButton size="small" color="inherit" onClick={dismissApkBanner} aria-label="dismiss apk banner">
+                  <CloseRoundedIcon fontSize="small" />
+                </IconButton>
+              </Stack>
+            }
+          >
+            {releaseState.version
+              ? `New Android build v${releaseState.version} is available.`
+              : 'New Android build is available.'}
+          </Alert>
+        </Snackbar>
 
         <Container
           maxWidth="lg"
           sx={{
             py: { xs: 2, md: 4 },
             px: { xs: 1.25, sm: 2, md: 3 },
-            pb: { xs: 'calc(86px + env(safe-area-inset-bottom))', md: 4 },
+            pb: { xs: 'calc(92px + env(safe-area-inset-bottom))', md: 'calc(98px + env(safe-area-inset-bottom))' },
             flex: 1
           }}
         >
@@ -103,40 +207,40 @@ export default function App() {
           </Box>
         </Container>
 
-        <Paper
-          elevation={12}
-          sx={{
-            position: 'fixed',
-            left: 10,
-            right: 10,
-            bottom: 'calc(10px + env(safe-area-inset-bottom))',
-            zIndex: 1100,
-            borderRadius: 4,
-            border: '1px solid rgba(20, 32, 34, 0.08)',
-            overflow: 'hidden',
-            display: { xs: 'block', md: 'none' }
-          }}
-        >
-          <BottomNavigation value={activePath} onChange={(_, next) => navigate(next)} showLabels>
-            {navItems.map((item) => (
-              <BottomNavigationAction
-                key={item.to}
-                value={item.to}
-                label={item.mobileLabel}
-                icon={item.icon}
-                sx={{ minWidth: 0 }}
-              />
-            ))}
-          </BottomNavigation>
-        </Paper>
-
         <Box
           component="footer"
-          sx={{ pb: { xs: 0.75, md: 2.5 }, textAlign: 'center', opacity: 0.75, fontSize: 12, px: 1 }}
+          sx={{
+            pb: 0.75,
+            textAlign: 'center',
+            opacity: 0.7,
+            fontSize: 12,
+            px: 1
+          }}
         >
-          Built for your personal program length | Progressive Web App
+          Powered by Burinious Web Solutions
         </Box>
       </Box>
+
+      <Paper
+        elevation={14}
+        sx={{
+          position: 'fixed',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'min(760px, calc(100% - 20px))',
+          bottom: 'calc(10px + env(safe-area-inset-bottom))',
+          zIndex: 1200,
+          borderRadius: 4,
+          border: '1px solid rgba(20, 32, 34, 0.08)',
+          overflow: 'hidden'
+        }}
+      >
+        <BottomNavigation value={activePath} onChange={(_, next) => navigate(next)} showLabels>
+          {navItems.map((item) => (
+            <BottomNavigationAction key={item.to} value={item.to} label={item.label} icon={item.icon} sx={{ minWidth: 0 }} />
+          ))}
+        </BottomNavigation>
+      </Paper>
     </Box>
   )
 }
