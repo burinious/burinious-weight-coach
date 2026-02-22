@@ -1,7 +1,31 @@
 import React, { useEffect, useState } from 'react'
-import { Card, CardContent, Grid, TextField, Button, Stack, Typography, Alert, MenuItem } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  Grid,
+  TextField,
+  Button,
+  Stack,
+  Typography,
+  Alert,
+  MenuItem,
+  Chip,
+  InputAdornment
+} from '@mui/material'
 import { format } from 'date-fns'
 import { z } from 'zod'
+import {
+  CalendarMonthRounded,
+  FlagRounded,
+  RestaurantRounded,
+  EggRounded,
+  DirectionsWalkRounded,
+  WaterDropRounded,
+  TuneRounded,
+  RocketLaunchRounded,
+  AutorenewRounded,
+  DeleteForeverRounded
+} from '@mui/icons-material'
 import useAppStore from '../store/useAppStore.js'
 
 const durationOptions = [30, 45, 60, 90, 120, 180]
@@ -74,10 +98,14 @@ export default function Settings() {
     <Stack spacing={2}>
       <Card>
         <CardContent>
-          <Typography variant="h6">Settings</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-            Configure your targets, duration, and start date. Change duration anytime.
-          </Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent="space-between">
+            <BoxTitle
+              icon={<TuneRounded color="primary" />}
+              title="Settings"
+              subtitle="Configure your targets, duration, and start date. Change duration anytime."
+            />
+            <Chip color="secondary" label={`${form.programDays || settings.programDays || 90} day plan`} size="small" />
+          </Stack>
         </CardContent>
       </Card>
 
@@ -85,13 +113,20 @@ export default function Settings() {
         <CardContent>
           <Stack spacing={2}>
             {msg && <Alert severity={msg.severity}>{msg.text}</Alert>}
-            <Grid container spacing={1.5}>
+            <Grid container spacing={1.25}>
               <Grid item xs={12} md={6}>
                 <TextField
                   select
                   label="Program duration (days)"
                   value={form.programDays}
                   onChange={(event) => setForm({ ...form, programDays: Number(event.target.value) })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ color: 'primary.main' }}>
+                        <CalendarMonthRounded fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
                 >
                   {durationOptions.map((days) => (
                     <MenuItem key={days} value={days}>
@@ -114,6 +149,13 @@ export default function Settings() {
                   type="number"
                   value={form.goalKg}
                   onChange={(event) => setForm({ ...form, goalKg: Number(event.target.value) })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ color: 'primary.main' }}>
+                        <FlagRounded fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -122,6 +164,13 @@ export default function Settings() {
                   type="number"
                   value={form.dailyCalorieTarget}
                   onChange={(event) => setForm({ ...form, dailyCalorieTarget: Number(event.target.value) })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ color: 'primary.main' }}>
+                        <RestaurantRounded fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -130,6 +179,13 @@ export default function Settings() {
                   type="number"
                   value={form.proteinTarget}
                   onChange={(event) => setForm({ ...form, proteinTarget: Number(event.target.value) })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ color: 'primary.main' }}>
+                        <EggRounded fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -138,6 +194,13 @@ export default function Settings() {
                   type="number"
                   value={form.stepTarget}
                   onChange={(event) => setForm({ ...form, stepTarget: Number(event.target.value) })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ color: 'primary.main' }}>
+                        <DirectionsWalkRounded fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -146,24 +209,45 @@ export default function Settings() {
                   type="number"
                   value={form.waterTarget}
                   onChange={(event) => setForm({ ...form, waterTarget: Number(event.target.value) })}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ color: 'primary.main' }}>
+                        <WaterDropRounded fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
                 />
               </Grid>
             </Grid>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <Button variant="contained" onClick={onSave}>
+              <Button variant="contained" onClick={onSave} startIcon={<AutorenewRounded />} fullWidth>
                 Save settings
               </Button>
-              <Button variant="outlined" color="secondary" onClick={onStartProgram}>
+              <Button variant="outlined" color="secondary" onClick={onStartProgram} startIcon={<RocketLaunchRounded />} fullWidth>
                 {programStarted ? 'Restart program' : 'Start program'}
               </Button>
-              <Button variant="outlined" color="error" onClick={onReset}>
+              <Button variant="outlined" color="error" onClick={onReset} startIcon={<DeleteForeverRounded />} fullWidth>
                 Reset all data
               </Button>
             </Stack>
           </Stack>
         </CardContent>
       </Card>
+    </Stack>
+  )
+}
+
+function BoxTitle({ icon, title, subtitle }) {
+  return (
+    <Stack spacing={0.5}>
+      <Stack direction="row" spacing={1} alignItems="center">
+        {icon}
+        <Typography variant="h6">{title}</Typography>
+      </Stack>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        {subtitle}
+      </Typography>
     </Stack>
   )
 }

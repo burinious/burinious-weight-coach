@@ -14,6 +14,15 @@ import {
   Chip,
   Box
 } from '@mui/material'
+import {
+  CalendarMonthRounded,
+  RestaurantRounded,
+  EggRounded,
+  WaterDropRounded,
+  DirectionsWalkRounded,
+  FitnessCenterRounded,
+  MonitorWeightRounded
+} from '@mui/icons-material'
 import useAppStore from '../store/useAppStore.js'
 
 export default function History() {
@@ -37,12 +46,12 @@ export default function History() {
             <Box>
               <Typography variant="h6">History</Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Review daily compliance, nutrition, and movement trends.
+                Review daily compliance, nutrition, movement, and weight trends.
               </Typography>
             </Box>
-            <Stack direction="row" spacing={1}>
-              <Chip size="small" label={`${rows.length} logged days`} />
-              <Chip size="small" color="secondary" label={`${weights.length} weigh-ins`} />
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Chip size="small" icon={<CalendarMonthRounded />} label={`${rows.length} logged days`} />
+              <Chip size="small" color="secondary" icon={<MonitorWeightRounded />} label={`${weights.length} weigh-ins`} />
             </Stack>
           </Stack>
         </CardContent>
@@ -67,22 +76,22 @@ export default function History() {
                     <Typography variant="subtitle2">{row.date}</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <SmallStat label="Calories" value={row.calories} unit="kcal" />
+                    <SmallStat icon={<RestaurantRounded fontSize="inherit" />} label="Calories" value={row.calories} unit="kcal" />
                   </Grid>
                   <Grid item xs={6}>
-                    <SmallStat label="Protein" value={row.protein} unit="g" />
+                    <SmallStat icon={<EggRounded fontSize="inherit" />} label="Protein" value={row.protein} unit="g" />
                   </Grid>
                   <Grid item xs={6}>
-                    <SmallStat label="Water" value={row.water} unit="ml" />
+                    <SmallStat icon={<WaterDropRounded fontSize="inherit" />} label="Water" value={row.water} unit="ml" />
                   </Grid>
                   <Grid item xs={6}>
-                    <SmallStat label="Steps" value={row.steps} />
+                    <SmallStat icon={<DirectionsWalkRounded fontSize="inherit" />} label="Steps" value={row.steps} />
                   </Grid>
                   <Grid item xs={6}>
-                    <SmallStat label="Workout" value={row.workoutMins} unit="min" />
+                    <SmallStat icon={<FitnessCenterRounded fontSize="inherit" />} label="Workout" value={row.workoutMins} unit="min" />
                   </Grid>
                   <Grid item xs={6}>
-                    <SmallStat label="Weight" value={weightByDate[row.date]} unit="kg" />
+                    <SmallStat icon={<MonitorWeightRounded fontSize="inherit" />} label="Weight" value={weightByDate[row.date]} unit="kg" />
                   </Grid>
                 </Grid>
               </CardContent>
@@ -136,12 +145,13 @@ export default function History() {
   )
 }
 
-function SmallStat({ label, value, unit }) {
+function SmallStat({ icon, label, value, unit }) {
   return (
     <Stack spacing={0.25}>
-      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-        {label}
-      </Typography>
+      <Stack direction="row" spacing={0.5} alignItems="center" sx={{ color: 'text.secondary' }}>
+        <Box sx={{ fontSize: 14, display: 'grid', placeItems: 'center', color: 'primary.main' }}>{icon}</Box>
+        <Typography variant="caption">{label}</Typography>
+      </Stack>
       <Typography variant="body2" sx={{ fontWeight: 650 }}>
         {formatValue(value)}
         {typeof value === 'number' && unit ? ` ${unit}` : ''}

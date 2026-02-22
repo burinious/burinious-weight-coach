@@ -65,6 +65,17 @@ const theme = createTheme({
           borderRadius: 10
         }
       }
+    },
+    MuiBottomNavigationAction: {
+      styleOverrides: {
+        root: {
+          minWidth: 0
+        },
+        label: {
+          fontSize: 11,
+          fontWeight: 650
+        }
+      }
     }
   },
   typography: {

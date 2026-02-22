@@ -22,7 +22,7 @@ export default function WeightChart() {
     return (
       <Box
         sx={{
-          height: 280,
+          height: { xs: 220, md: 280 },
           borderRadius: 3,
           border: '1px dashed rgba(20, 32, 34, 0.2)',
           display: 'grid',
@@ -44,7 +44,7 @@ export default function WeightChart() {
   }
 
   return (
-    <Box sx={{ width: '100%', height: 280 }}>
+    <Box sx={{ width: '100%', height: { xs: 220, md: 280 } }}>
       <ResponsiveContainer>
         <LineChart data={data} margin={{ top: 10, right: 12, bottom: 6, left: 4 }}>
           <defs>

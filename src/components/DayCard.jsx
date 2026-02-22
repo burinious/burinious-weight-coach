@@ -1,5 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, Chip, Stack, Typography } from '@mui/material'
+import FitnessCenterRoundedIcon from '@mui/icons-material/FitnessCenterRounded'
+import EventRoundedIcon from '@mui/icons-material/EventRounded'
 
 export default function DayCard({ day, onClick }) {
   return (
@@ -17,10 +19,16 @@ export default function DayCard({ day, onClick }) {
         titleTypographyProps={{ variant: 'subtitle1', fontWeight: 700 }}
         subheader={day.focus}
         subheaderTypographyProps={{ color: 'text.secondary' }}
+        avatar={<EventRoundedIcon color="primary" fontSize="small" />}
       />
       <CardContent>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <Chip label={day.workout} variant="outlined" sx={{ maxWidth: '100%', height: 'auto', '& .MuiChip-label': { whiteSpace: 'normal' } }} />
+          <Chip
+            icon={<FitnessCenterRoundedIcon />}
+            label={day.workout}
+            variant="outlined"
+            sx={{ maxWidth: '100%', height: 'auto', '& .MuiChip-label': { whiteSpace: 'normal' } }}
+          />
         </Stack>
         {day.notes && <Typography sx={{ mt: 1 }} variant="body2" color="text.secondary">{day.notes}</Typography>}
       </CardContent>

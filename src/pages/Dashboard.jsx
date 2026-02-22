@@ -11,6 +11,20 @@ import {
   LinearProgress,
   Alert
 } from '@mui/material'
+import {
+  ScaleRounded,
+  TrendingDownRounded,
+  FlagRounded,
+  TaskAltRounded,
+  LocalFireDepartmentRounded,
+  InsightsRounded,
+  EggRounded,
+  MonitorWeightRounded,
+  RestaurantRounded,
+  WaterDropRounded,
+  DirectionsWalkRounded,
+  FitnessCenterRounded
+} from '@mui/icons-material'
 import { Link, useNavigate } from 'react-router-dom'
 import { differenceInCalendarDays, format, isValid, parseISO, subDays } from 'date-fns'
 import useAppStore from '../store/useAppStore.js'
@@ -45,9 +59,7 @@ export default function Dashboard() {
   const todayISO = format(new Date(), 'yyyy-MM-dd')
   const programDays = Number(settings.programDays) || 90
 
-  const todayPlan = plan.find((entry) => entry.date === todayISO)
   const todayLog = logs[todayISO] || {}
-
   const sortedWeights = [...weights].sort((a, b) => a.date.localeCompare(b.date))
   const latestWeight = sortedWeights[sortedWeights.length - 1]?.kg
   const startingWeight = sortedWeights[0]?.kg
@@ -66,11 +78,41 @@ export default function Dashboard() {
   const consistency = programStarted ? clampPercent((loggedDays / expectedLogs) * 100) : 0
 
   const todayMetrics = [
-    { label: 'Calories', value: todayLog.calories, target: settings.dailyCalorieTarget, unit: 'kcal' },
-    { label: 'Protein', value: todayLog.protein, target: settings.proteinTarget, unit: 'g' },
-    { label: 'Water', value: todayLog.water, target: settings.waterTarget, unit: 'ml' },
-    { label: 'Steps', value: todayLog.steps, target: settings.stepTarget, unit: '' },
-    { label: 'Workout', value: todayLog.workoutMins, target: 45, unit: 'min' }
+    {
+      label: 'Calories',
+      value: todayLog.calories,
+      target: settings.dailyCalorieTarget,
+      unit: 'kcal',
+      icon: <RestaurantRounded fontSize="small" />
+    },
+    {
+      label: 'Protein',
+      value: todayLog.protein,
+      target: settings.proteinTarget,
+      unit: 'g',
+      icon: <EggRounded fontSize="small" />
+    },
+    {
+      label: 'Water',
+      value: todayLog.water,
+      target: settings.waterTarget,
+      unit: 'ml',
+      icon: <WaterDropRounded fontSize="small" />
+    },
+    {
+      label: 'Steps',
+      value: todayLog.steps,
+      target: settings.stepTarget,
+      unit: '',
+      icon: <DirectionsWalkRounded fontSize="small" />
+    },
+    {
+      label: 'Workout',
+      value: todayLog.workoutMins,
+      target: 45,
+      unit: 'min',
+      icon: <FitnessCenterRounded fontSize="small" />
+    }
   ]
 
   const todayIdx = plan.findIndex((entry) => entry.date === todayISO)
@@ -94,12 +136,25 @@ export default function Dashboard() {
   }).length
 
   const insights = [
-    `${daysLoggedLast7}/7 logged days in the last week`,
-    `${streak} day active logging streak`,
-    calorieDelta == null
-      ? 'Need more calorie data for trend analysis'
-      : `Average calories are ${Math.abs(calorieDelta)} kcal ${calorieDelta >= 0 ? 'over' : 'under'} target`,
-    `${proteinHitDays}/14 days hit protein target`
+    {
+      icon: <TaskAltRounded fontSize="small" />,
+      text: `${daysLoggedLast7}/7 logged days in the last week`
+    },
+    {
+      icon: <LocalFireDepartmentRounded fontSize="small" />,
+      text: `${streak} day active logging streak`
+    },
+    {
+      icon: <InsightsRounded fontSize="small" />,
+      text:
+        calorieDelta == null
+          ? 'Need more calorie data for trend analysis'
+          : `Average calories are ${Math.abs(calorieDelta)} kcal ${calorieDelta >= 0 ? 'over' : 'under'} target`
+    },
+    {
+      icon: <EggRounded fontSize="small" />,
+      text: `${proteinHitDays}/14 days hit protein target`
+    }
   ]
 
   return (
@@ -114,10 +169,10 @@ export default function Dashboard() {
               spacing={1}
             >
               <Box>
-                <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 1.2 }}>
+                <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 1.1 }}>
                   Burinious Web Solutions
                 </Typography>
-                <Typography variant="h4" sx={{ mt: 0.5 }}>
+                <Typography variant="h4" sx={{ mt: 0.5, fontSize: { xs: '1.6rem', md: '2rem' } }}>
                   Coach Dashboard
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
@@ -126,17 +181,17 @@ export default function Dashboard() {
                     : `Set your duration and press Start to begin your ${programDays}-day program`}
                 </Typography>
               </Box>
-              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                 {programStarted ? (
-                  <Button variant="contained" component={Link} to="/log">
+                  <Button variant="contained" component={Link} to="/log" fullWidth>
                     Log today
                   </Button>
                 ) : (
-                  <Button variant="contained" onClick={() => startProgram(todayISO)}>
+                  <Button variant="contained" onClick={() => startProgram(todayISO)} fullWidth>
                     Start program
                   </Button>
                 )}
-                <Button variant="outlined" component={Link} to="/settings">
+                <Button variant="outlined" component={Link} to="/settings" fullWidth>
                   Settings
                 </Button>
               </Stack>
@@ -148,27 +203,31 @@ export default function Dashboard() {
               </Alert>
             )}
 
-            <Grid container spacing={1.5}>
+            <Grid container spacing={1.25}>
               <Grid item xs={6} md={3}>
-                <MiniMetric title="Current weight" value={latestWeight != null ? `${latestWeight} kg` : '--'} />
+                <MiniMetric icon={<ScaleRounded fontSize="small" />} title="Current weight" value={latestWeight != null ? `${latestWeight} kg` : '--'} />
               </Grid>
               <Grid item xs={6} md={3}>
                 <MiniMetric
+                  icon={<TrendingDownRounded fontSize="small" />}
                   title="Weight change"
                   value={weightDelta != null ? `${weightDelta > 0 ? '+' : ''}${weightDelta} kg` : '--'}
                 />
               </Grid>
               <Grid item xs={6} md={3}>
-                <MiniMetric title="Goal progress" value={`${Math.round(goalProgress)}%`} />
+                <MiniMetric icon={<FlagRounded fontSize="small" />} title="Goal progress" value={`${Math.round(goalProgress)}%`} />
               </Grid>
               <Grid item xs={6} md={3}>
-                <MiniMetric title="Consistency" value={`${Math.round(consistency)}%`} />
+                <MiniMetric icon={<TaskAltRounded fontSize="small" />} title="Consistency" value={`${Math.round(consistency)}%`} />
               </Grid>
             </Grid>
 
-            <Grid container spacing={1.5}>
+            <Grid container spacing={1.25}>
               <Grid item xs={12} md={6}>
-                <ProgressBar title={`Program day ${elapsedDays} of ${programDays}`} value={elapsedProgress} />
+                <ProgressBar
+                  title={`Program day ${elapsedDays} of ${programDays}`}
+                  value={elapsedProgress}
+                />
               </Grid>
               <Grid item xs={12} md={6}>
                 <ProgressBar title={`Fat-loss target ${settings.goalKg} kg`} value={goalProgress} />
@@ -184,7 +243,7 @@ export default function Dashboard() {
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.25 }}>
                 <Typography variant="h6">Weight trend</Typography>
-                <Chip label={`${weights.length} entries`} size="small" />
+                <Chip icon={<MonitorWeightRounded />} label={`${weights.length} entries`} size="small" />
               </Stack>
               <WeightChart />
             </CardContent>
@@ -198,12 +257,15 @@ export default function Dashboard() {
               </Typography>
               <Stack spacing={1}>
                 {insights.map((insight) => (
-                  <Typography key={insight} variant="body2" sx={{ color: 'text.secondary' }}>
-                    - {insight}
-                  </Typography>
+                  <Stack key={insight.text} direction="row" spacing={1} alignItems="flex-start">
+                    <Box sx={{ color: 'primary.main', mt: 0.25 }}>{insight.icon}</Box>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {insight.text}
+                    </Typography>
+                  </Stack>
                 ))}
               </Stack>
-              <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+              <Stack direction="row" spacing={1} sx={{ mt: 2 }} useFlexGap flexWrap="wrap">
                 <Chip size="small" color="primary" label={`${settings.dailyCalorieTarget} kcal`} />
                 <Chip size="small" color="secondary" label={`${settings.proteinTarget} g protein`} />
               </Stack>
@@ -217,19 +279,22 @@ export default function Dashboard() {
           <Typography variant="h6" gutterBottom>
             Today's numbers
           </Typography>
-          <Grid container spacing={1.5}>
+          <Grid container spacing={1.25}>
             {todayMetrics.map((metric) => {
               const hasValue = typeof metric.value === 'number'
               const progress = hasValue && metric.target ? clampPercent((metric.value / metric.target) * 100) : 0
               const valueLabel = hasValue ? `${metric.value}${metric.unit ? ` ${metric.unit}` : ''}` : '--'
               return (
                 <Grid item xs={12} sm={6} md={4} key={metric.label}>
-                  <Card variant="outlined">
+                  <Card variant="outlined" sx={{ height: '100%' }}>
                     <CardContent sx={{ py: 1.5 }}>
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {metric.label}
-                      </Typography>
-                      <Typography variant="h6" sx={{ mt: 0.5 }}>
+                      <Stack direction="row" spacing={0.75} alignItems="center">
+                        <Box sx={{ color: 'primary.main', display: 'grid', placeItems: 'center' }}>{metric.icon}</Box>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          {metric.label}
+                        </Typography>
+                      </Stack>
+                      <Typography variant="h6" sx={{ mt: 0.6 }}>
                         {valueLabel}
                       </Typography>
                       <LinearProgress
@@ -260,7 +325,7 @@ export default function Dashboard() {
             </Typography>
           )}
           {programStarted && (
-            <Grid container spacing={1.5}>
+            <Grid container spacing={1.25}>
               {nextSessions.map((entry) => (
                 <Grid item xs={12} md={4} key={entry.date}>
                   <DayCard day={entry} onClick={() => navigate('/log')} />
@@ -274,14 +339,17 @@ export default function Dashboard() {
   )
 }
 
-function MiniMetric({ title, value }) {
+function MiniMetric({ icon, title, value }) {
   return (
     <Card variant="outlined" sx={{ height: '100%' }}>
-      <CardContent sx={{ py: 1.5 }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {title}
-        </Typography>
-        <Typography variant="h6" sx={{ mt: 0.5 }}>
+      <CardContent sx={{ py: 1.25 }}>
+        <Stack direction="row" spacing={0.75} alignItems="center">
+          <Box sx={{ color: 'primary.main', display: 'grid', placeItems: 'center' }}>{icon}</Box>
+          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.2 }}>
+            {title}
+          </Typography>
+        </Stack>
+        <Typography variant="h6" sx={{ mt: 0.5, fontSize: { xs: '1.05rem', md: '1.2rem' } }}>
           {value}
         </Typography>
       </CardContent>
@@ -292,9 +360,11 @@ function MiniMetric({ title, value }) {
 function ProgressBar({ title, value }) {
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-        <Typography variant="body2">{title}</Typography>
+      <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }} spacing={1}>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+          {title}
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
           {Math.round(value)}%
         </Typography>
       </Stack>

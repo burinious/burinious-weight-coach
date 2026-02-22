@@ -8,6 +8,7 @@
 
 html, body, #root {
   min-height: 100%;
+  width: 100%;
 }
 
 * {
@@ -68,6 +69,7 @@ a {
   display: flex;
   min-height: 100%;
   flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .page-enter {
@@ -108,4 +110,20 @@ a {
 @keyframes driftB {
   0%, 100% { transform: translate(0, 0); }
   50% { transform: translate(-18px, 18px); }
+}
+
+@media (max-width: 599px) {
+  .orb-a {
+    width: 220px;
+    height: 220px;
+    left: -110px;
+    top: 70px;
+  }
+
+  .orb-b {
+    width: 200px;
+    height: 200px;
+    right: -95px;
+    top: 280px;
+  }
 }

@@ -1,8 +1,28 @@
 import React, { useMemo, useState } from 'react'
-import { Card, CardContent, Grid, TextField, Button, Stack, Typography, Alert, Chip } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  Grid,
+  TextField,
+  Button,
+  Stack,
+  Typography,
+  Alert,
+  Chip,
+  InputAdornment
+} from '@mui/material'
 import { format } from 'date-fns'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
+import {
+  RestaurantRounded,
+  EggRounded,
+  WaterDropRounded,
+  DirectionsWalkRounded,
+  FitnessCenterRounded,
+  MonitorWeightRounded,
+  RocketLaunchRounded
+} from '@mui/icons-material'
 import useAppStore from '../store/useAppStore.js'
 
 const numericOptional = (min, max) =>
@@ -48,12 +68,42 @@ export default function LogDay() {
 
   const fieldMeta = useMemo(
     () => [
-      { key: 'calories', label: 'Calories (kcal)', target: settings.dailyCalorieTarget },
-      { key: 'protein', label: 'Protein (g)', target: settings.proteinTarget },
-      { key: 'water', label: 'Water (ml)', target: settings.waterTarget },
-      { key: 'steps', label: 'Steps', target: settings.stepTarget },
-      { key: 'workoutMins', label: 'Workout (mins)', target: 45 },
-      { key: 'weightKg', label: 'Weight (kg)', target: null }
+      {
+        key: 'calories',
+        label: 'Calories (kcal)',
+        target: settings.dailyCalorieTarget,
+        icon: <RestaurantRounded fontSize="small" />
+      },
+      {
+        key: 'protein',
+        label: 'Protein (g)',
+        target: settings.proteinTarget,
+        icon: <EggRounded fontSize="small" />
+      },
+      {
+        key: 'water',
+        label: 'Water (ml)',
+        target: settings.waterTarget,
+        icon: <WaterDropRounded fontSize="small" />
+      },
+      {
+        key: 'steps',
+        label: 'Steps',
+        target: settings.stepTarget,
+        icon: <DirectionsWalkRounded fontSize="small" />
+      },
+      {
+        key: 'workoutMins',
+        label: 'Workout (mins)',
+        target: 45,
+        icon: <FitnessCenterRounded fontSize="small" />
+      },
+      {
+        key: 'weightKg',
+        label: 'Weight (kg)',
+        target: null,
+        icon: <MonitorWeightRounded fontSize="small" />
+      }
     ],
     [settings.dailyCalorieTarget, settings.proteinTarget, settings.stepTarget, settings.waterTarget]
   )
@@ -88,15 +138,18 @@ export default function LogDay() {
       <Card>
         <CardContent>
           <Stack spacing={2}>
-            <Typography variant="h6">Start your program first</Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <RocketLaunchRounded color="primary" />
+              <Typography variant="h6">Start your program first</Typography>
+            </Stack>
             <Alert severity="info">
               Logging is unlocked after you start your plan. Set duration in Settings, then tap Start program.
             </Alert>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <Button variant="contained" onClick={() => startProgram(today)}>
+              <Button variant="contained" onClick={() => startProgram(today)} fullWidth>
                 Start now
               </Button>
-              <Button variant="outlined" component={Link} to="/settings">
+              <Button variant="outlined" component={Link} to="/settings" fullWidth>
                 Go to settings
               </Button>
             </Stack>
@@ -132,7 +185,7 @@ export default function LogDay() {
         <CardContent>
           <Stack spacing={2}>
             {msg && <Alert severity={msg.severity}>{msg.text}</Alert>}
-            <Grid container spacing={1.5}>
+            <Grid container spacing={1.25}>
               {fieldMeta.map((field) => (
                 <Grid key={field.key} item xs={12} sm={6} md={4}>
                   <TextField
@@ -142,16 +195,19 @@ export default function LogDay() {
                     onChange={(event) => onChangeValue(field.key, event.target.value)}
                     helperText={field.target ? `Target: ${field.target}` : 'Optional'}
                     inputProps={{ min: 0 }}
+                    InputProps={{
+                      startAdornment: <InputAdornment position="start">{field.icon}</InputAdornment>
+                    }}
                   />
                 </Grid>
               ))}
             </Grid>
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <Button onClick={onSubmit} variant="contained" size="large">
+              <Button onClick={onSubmit} variant="contained" size="large" fullWidth>
                 Save day log
               </Button>
-              <Button onClick={() => onDateChange(today)} variant="outlined" size="large">
+              <Button onClick={() => onDateChange(today)} variant="outlined" size="large" fullWidth>
                 Jump to today
               </Button>
             </Stack>
