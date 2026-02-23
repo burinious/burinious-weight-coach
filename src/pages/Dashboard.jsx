@@ -303,12 +303,9 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      <Grid container spacing={2} justifyContent="center" alignItems="stretch">
-        <Grid item xs={12} md={7} sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Card
-            className="stagger-rise"
-            sx={{ animationDelay: '80ms', width: '100%', maxWidth: { xs: '100%', md: 760 }, height: '100%' }}
-          >
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="stretch" sx={{ width: '100%' }}>
+        <Box sx={{ flex: { md: '7 1 0%' }, minWidth: 0, display: 'flex' }}>
+          <Card className="stagger-rise" sx={{ animationDelay: '80ms', width: '100%', height: '100%' }}>
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.25 }}>
                 <Stack direction="row" spacing={1} alignItems="center">
@@ -374,13 +371,10 @@ export default function Dashboard() {
               </Grid>
             </CardContent>
           </Card>
-        </Grid>
+        </Box>
 
-        <Grid item xs={12} md={5} sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Card
-            className="stagger-rise"
-            sx={{ animationDelay: '140ms', width: '100%', maxWidth: { xs: '100%', md: 540 }, height: '100%' }}
-          >
+        <Box sx={{ flex: { md: '5 1 0%' }, minWidth: 0, display: 'flex' }}>
+          <Card className="stagger-rise" sx={{ animationDelay: '140ms', width: '100%', height: '100%' }}>
             <CardContent sx={{ height: '100%' }}>
               <Stack spacing={1.25} sx={{ height: '100%' }}>
                 <Typography variant="h6">Insights</Typography>
@@ -407,8 +401,8 @@ export default function Dashboard() {
               </Stack>
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
 
       <Card className="stagger-rise" sx={{ animationDelay: '200ms' }}>
         <CardContent>
